@@ -1,32 +1,41 @@
-# Banco Pichincha
+# Banco Pichincha — App Clientes
 
-App demo de banca móvil para el proyecto de teoría.
+App móvil de homebanking para el proyecto final (rúbrica Banco Andino).
 
 ## Identidad
 
 - **Nombre al instalar:** Banco Pichincha
-- **Carpeta del proyecto:** `banco_pichincha`
-- **Colores:** azul marino `#002B5C`, amarillo `#FFD200`, fondo blanco
+- **Colores:** azul `#002B5C`, amarillo `#FFD200`
 
-## Funcionalidades del usuario
+## Funcionalidades
 
-- **Inicio:** saldo total, acciones rápidas, Yape/Plin/interbancarias, movimientos
-- **Enviar dinero:** Yape, Plin y transferencias interbancarias (CCI)
-- **Contratar:** catálogo de productos (cuentas, préstamos, hipotecas) y servicios (seguros, pagos)
-- **Cuentas:** ahorros, créditos, tarjetas de débito y pagos de servicios
-- **Bandeja:** notificaciones y mensajes del banco
-- **Perfil y Ayuda:** accesibles desde el inicio
+- Login con **DNI** + contraseña (Supabase Auth)
+- Inicio, enviar dinero, contratar, cuentas, bandeja
+- Cuentas, créditos + cronograma, tarjetas, pagos, transferencias
+- Integración E2E con Fuerza de Ventas vía `sync_outbox`
 
-## Backend
+## Supabase
 
-- **Supabase** (Auth + PostgreSQL)
-- **Modo demo offline** sin conexión (datos en memoria)
+1. Ejecutar `supabase/schema_and_seed.sql`
+2. Ejecutar `supabase/02_rubrica_integracion.sql`
+3. Desactivar confirmación de email en Auth (desarrollo)
+
+Proyecto: `https://uomaqpphyouzbnestbba.supabase.co`
 
 ## Ejecutar
 
 ```bash
 cd banco_pichincha
 flutter pub get
-dart run flutter_launcher_icons
 flutter run
 ```
+
+## Documentación rúbrica
+
+- `docs/RUBRICA_AUTOEVALUACION.md` — evidencias 4/4 por criterio
+- `docs/ARQUITECTURA.md` — capas, tablas, diagrama E2E
+
+## Registro
+
+1. **Regístrate** con DNI, correo, celular y clave
+2. **Inicia sesión** solo con DNI + clave

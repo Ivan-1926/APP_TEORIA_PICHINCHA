@@ -13,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _dniController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscureText = true;
   bool _isLoading = false;
@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _dniController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -34,8 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-    final error = await AuthService.signIn(
-      email: _emailController.text.trim(),
+    final error = await AuthService.signInWithDni(
+      documento: _dniController.text.trim(),
       password: _passwordController.text,
     );
 
@@ -144,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Ingresa tus credenciales para acceder a tus cuentas.',
+                        'Ingresa tu DNI y clave para acceder a tus cuentas.',
                         style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                       ),
                       const SizedBox(height: 24),
@@ -176,19 +176,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Email Field
                       TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _dniController,
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          labelText: 'Banca por Internet (Correo)',
-                          hintText: 'ejemplo@correo.com',
-                          prefixIcon: Icon(Icons.person_outline),
+                          labelText: 'DNI',
+                          hintText: '12345678',
+                          prefixIcon: Icon(Icons.badge_outlined),
                         ),
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
-                            return 'Por favor ingresa tu correo';
+                            return 'Por favor ingresa tu DNI';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
-                            return 'Ingresa un correo electrónico válido';
+                          if (val.trim().length != 8) {
+                            return 'El DNI debe tener 8 dígitos';
                           }
                           return null;
                         },

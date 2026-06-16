@@ -509,14 +509,27 @@ class BankDataService {
   }
 
   static Future<void> marcarNotificacionLeida(String notificacionId) async {
-    _initMockData();
-    final notif = _mockNotificaciones.where((n) => n.id == notificacionId);
-    if (notif.isNotEmpty) notif.first.leida = true;
+    try {
+      await SupabaseService.client
+          .from('notificaciones')
+          .update({'leida': true})
+          .eq('id', notificacionId);
+    } catch (e) {
+      debugPrint('Error marcando notificación: $e');
+    }
   }
 
-  static int contarNotificacionesNoLeidas(String usuarioId) {
-    _initMockData();
-    return _mockNotificaciones.where((n) => n.usuarioId == usuarioId && !n.leida).length;
+  static Future<int> contarNotificacionesNoLeidas(String usuarioId) async {
+    try {
+      final rows = await SupabaseService.client
+          .from('notificaciones')
+          .select('id')
+          .eq('usuario_id', usuarioId)
+          .eq('leida', false);
+      return (rows as List).length;
+    } catch (e) {
+      return 0;
+    }
   }
 
   static Future<String?> realizarPagoServicio({
@@ -526,29 +539,70 @@ class BankDataService {
     required String referencia,
     required double monto,
   }) async {
-    _initMockData();
-    final cuentaMatches = _mockCuentas.where((c) => c.id == cuentaId);
-    if (cuentaMatches.isEmpty) return 'Cuenta no encontrada.';
-    final cuenta = cuentaMatches.first;
-    if (cuenta.saldo < monto) return 'Saldo insuficiente.';
-    cuenta.saldo -= monto;
-    final now = DateTime.now();
-    _mockMovimientos.add(Movimiento(
-      id: 'mock_p_${now.millisecondsSinceEpoch}',
-      cuentaId: cuentaId,
-      usuarioId: usuarioId,
-      fecha: now,
-      descripcion: 'Pago $servicio - Ref. $referencia',
-      monto: -monto,
-      tipo: 'retiro',
-    ));
-    return null;
+    try {
+      final origRow = await SupabaseService.client
+          .from('cuentas_ahorro')
+          .select('saldo')
+          .eq('id', cuentaId)
+          .eq('usuario_id', usuarioId)
+          .maybeSingle();
+      if (origRow == null) return 'Cuenta no encontrada.';
+      final saldoActual = (origRow['saldo'] as num).toDouble();
+      if (saldoActual < monto) return 'Saldo insuficiente.';
+
+      await SupabaseService.client
+          .from('cuentas_ahorro')
+          .update({'saldo': saldoActual - monto})
+          .eq('id', cuentaId);
+
+      final now = DateTime.now();
+      await SupabaseService.client.from('movimientos').insert({
+        'cuenta_id': cuentaId,
+        'usuario_id': usuarioId,
+        'fecha': toDbDate(now),
+        'descripcion': 'Pago $servicio - Ref. $referencia',
+        'monto': -monto,
+        'tipo': 'retiro',
+      });
+
+      await SupabaseService.client.from('pagos_servicios').insert({
+        'usuario_id': usuarioId,
+        'cuenta_id': cuentaId,
+        'servicio': servicio,
+        'referencia': referencia,
+        'monto': monto,
+        'fecha': toDbDate(now),
+      });
+
+      return null;
+    } catch (e) {
+      debugPrint('Error pago servicio: $e');
+      return 'No se pudo registrar el pago. Verifica Supabase.';
+    }
   }
 
   static Future<List<PagoServicio>> getPagos(String usuarioId) async {
-    _initMockData();
-    return _mockPagos.where((p) => p.usuarioId == usuarioId).toList()
-      ..sort((a, b) => b.fecha.compareTo(a.fecha));
+    try {
+      final rows = await SupabaseService.client
+          .from('pagos_servicios')
+          .select()
+          .eq('usuario_id', usuarioId)
+          .order('fecha', ascending: false);
+      return (rows as List).map((r) {
+        final map = Map<String, dynamic>.from(r);
+        return PagoServicio(
+          id: map['id'] as String,
+          usuarioId: map['usuario_id'] as String,
+          cuentaId: map['cuenta_id'] as String,
+          servicio: map['servicio'] as String,
+          referencia: map['referencia'] as String,
+          monto: (map['monto'] as num).toDouble(),
+          fecha: parseDbDate(map['fecha']),
+        );
+      }).toList();
+    } catch (e) {
+      return [];
+    }
   }
 
   static Future<String?> enviarDineroWallet({

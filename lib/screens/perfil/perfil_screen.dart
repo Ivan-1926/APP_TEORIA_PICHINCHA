@@ -33,7 +33,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final currentId = AuthService.currentUser?.id ?? BankDataService.demoUserId;
+    final currentId = AuthService.currentUser!.id;
     final user = await BankDataService.getUsuario(currentId);
     setState(() {
       _usuario = user;
@@ -47,7 +47,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     setState(() => _saving = true);
 
     try {
-      final currentId = AuthService.currentUser?.id ?? BankDataService.demoUserId;
+      final currentId = AuthService.currentUser!.id;
       await BankDataService.actualizarCelular(
         currentId,
         _celularController.text.trim(),
@@ -120,9 +120,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       // Editable cellular field
                       _buildCellularField(),
                       const SizedBox(height: 40),
-                      // Status info
-                      _buildDemoDisclaimer(),
-                      const SizedBox(height: 30),
                       ElevatedButton.icon(
                         onPressed: () async {
                           await AuthService.signOut();
@@ -166,8 +163,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Cliente Demo de Simulación',
+          Text(
+            'Cliente Banco Pichincha',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
           ),
         ],
@@ -279,29 +276,6 @@ class _PerfilScreenState extends State<PerfilScreen> {
               icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
               onPressed: () => setState(() => _editing = true),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDemoDisclaimer() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.textHint.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider.withOpacity(0.5)),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.info_outline, color: AppColors.textHint),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Esta es una cuenta fija de demostración. Para asegurar la integridad de la simulación, solo es posible modificar el celular.',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-            ),
-          ),
         ],
       ),
     );

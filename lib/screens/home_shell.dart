@@ -34,6 +34,7 @@ class HomeShell extends StatefulWidget {
 
 class HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
+  int _badgeCount = 0;
 
   final List<Widget> _screens = const [
     DashboardScreen(),
@@ -43,16 +44,24 @@ class HomeShellState extends State<HomeShell> {
     BandejaScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _refreshBadge();
+  }
+
+  Future<void> _refreshBadge() async {
+    final count = await BankDataService.contarNotificacionesNoLeidas(activeUserId);
+    if (mounted) setState(() => _badgeCount = count);
+  }
+
   void switchTab(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    setState(() => _currentIndex = index);
+    if (index == 4) _refreshBadge();
   }
 
   @override
   Widget build(BuildContext context) {
-    final badge = BankDataService.contarNotificacionesNoLeidas(activeUserId);
-
     return HomeShellProvider(
       state: this,
       child: Scaffold(
@@ -60,7 +69,7 @@ class HomeShellState extends State<HomeShell> {
         bottomNavigationBar: PichinchaNavBar(
           currentIndex: _currentIndex,
           onTap: switchTab,
-          badgeCount: badge,
+          badgeCount: _badgeCount,
         ),
       ),
     );

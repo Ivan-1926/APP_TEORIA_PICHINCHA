@@ -3,6 +3,8 @@ import '../../services/bank_data_service.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/brand_logo.dart';
+import '../../services/sync_integration_service.dart';
+import '../../services/auth_service.dart';
 import '../../services/user_scope.dart';
 import '../home_shell.dart';
 import '../perfil/perfil_screen.dart';
@@ -28,8 +30,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _load() async {
+    setState(() => _loading = true);
+    final doc = AuthService.currentUser?.documento ?? activeDocumento;
+    await SyncIntegrationService.procesarCreditosPendientes(doc);
     final cuentas = await BankDataService.getCuentas(activeUserId);
     final movs = await BankDataService.getMovimientos(activeUserId, limit: 5);
+    if (!mounted) return;
     setState(() {
       _cuentas = cuentas;
       _movimientos = movs;

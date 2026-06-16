@@ -126,6 +126,8 @@ class Credito {
   final DateTime fechaInicio;
   final int plazoMeses;
   final double tasaInteres;
+  final String? origenSolicitudId;
+  final bool espejoCore;
 
   Credito({
     required this.id,
@@ -137,6 +139,8 @@ class Credito {
     required this.fechaInicio,
     required this.plazoMeses,
     required this.tasaInteres,
+    this.origenSolicitudId,
+    this.espejoCore = false,
   });
 
   factory Credito.fromMap(Map<String, dynamic> map, String id) => Credito(
@@ -149,6 +153,8 @@ class Credito {
         fechaInicio: parseDbDate(map['fecha_inicio']),
         plazoMeses: map['plazo_meses'] ?? 12,
         tasaInteres: (map['tasa_interes'] ?? 0).toDouble(),
+        origenSolicitudId: map['origen_solicitud_id'] as String?,
+        espejoCore: map['espejo_core'] == true,
       );
 
   Map<String, dynamic> toMap() => {

@@ -96,6 +96,24 @@ class _CreditosScreenState extends State<CreditosScreen> {
                                               Text('Tasa TEA: ${credito.tasaInteres}%',
                                                   style: const TextStyle(
                                                       fontSize: 12, color: AppColors.textSecondary)),
+                                              if (credito.espejoCore) ...[
+                                                const SizedBox(height: 4),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.accent.withValues(alpha: 0.35),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: const Text(
+                                                    'Originado Fuerza de Ventas',
+                                                    style: TextStyle(
+                                                      fontSize: 9,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ],
                                           ),
                                         ],
