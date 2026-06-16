@@ -1,4 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+DateTime parseDbDate(dynamic value) {
+  if (value == null) return DateTime.now();
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.parse(value);
+  throw ArgumentError('Fecha inválida: $value');
+}
+
+String toDbDate(DateTime date) => date.toIso8601String();
 
 class Usuario {
   final String id;
@@ -24,6 +31,7 @@ class Usuario {
       );
 
   Map<String, dynamic> toMap() => {
+        'id': id,
         'nombre': nombre,
         'documento': documento,
         'email': email,
@@ -92,7 +100,7 @@ class Movimiento {
         id: id,
         cuentaId: map['cuenta_id'] ?? '',
         usuarioId: map['usuario_id'] ?? '',
-        fecha: (map['fecha'] as Timestamp).toDate(),
+        fecha: parseDbDate(map['fecha']),
         descripcion: map['descripcion'] ?? '',
         monto: (map['monto'] ?? 0).toDouble(),
         tipo: map['tipo'] ?? '',
@@ -101,7 +109,7 @@ class Movimiento {
   Map<String, dynamic> toMap() => {
         'cuenta_id': cuentaId,
         'usuario_id': usuarioId,
-        'fecha': Timestamp.fromDate(fecha),
+        'fecha': toDbDate(fecha),
         'descripcion': descripcion,
         'monto': monto,
         'tipo': tipo,
@@ -138,7 +146,7 @@ class Credito {
         montoOriginal: (map['monto_original'] ?? 0).toDouble(),
         saldoPendiente: (map['saldo_pendiente'] ?? 0).toDouble(),
         cuotaMensual: (map['cuota_mensual'] ?? 0).toDouble(),
-        fechaInicio: (map['fecha_inicio'] as Timestamp).toDate(),
+        fechaInicio: parseDbDate(map['fecha_inicio']),
         plazoMeses: map['plazo_meses'] ?? 12,
         tasaInteres: (map['tasa_interes'] ?? 0).toDouble(),
       );
@@ -149,7 +157,7 @@ class Credito {
         'monto_original': montoOriginal,
         'saldo_pendiente': saldoPendiente,
         'cuota_mensual': cuotaMensual,
-        'fecha_inicio': Timestamp.fromDate(fechaInicio),
+        'fecha_inicio': toDbDate(fechaInicio),
         'plazo_meses': plazoMeses,
         'tasa_interes': tasaInteres,
       };
@@ -182,7 +190,7 @@ class Cuota {
         id: id,
         creditoId: map['credito_id'] ?? '',
         numeroCuota: map['numero_cuota'] ?? 0,
-        fechaVencimiento: (map['fecha_vencimiento'] as Timestamp).toDate(),
+        fechaVencimiento: parseDbDate(map['fecha_vencimiento']),
         montoCuota: (map['monto_cuota'] ?? 0).toDouble(),
         capital: (map['capital'] ?? 0).toDouble(),
         interes: (map['interes'] ?? 0).toDouble(),
@@ -193,7 +201,7 @@ class Cuota {
   Map<String, dynamic> toMap() => {
         'credito_id': creditoId,
         'numero_cuota': numeroCuota,
-        'fecha_vencimiento': Timestamp.fromDate(fechaVencimiento),
+        'fecha_vencimiento': toDbDate(fechaVencimiento),
         'monto_cuota': montoCuota,
         'capital': capital,
         'interes': interes,
@@ -232,7 +240,7 @@ class Transferencia {
         cciDestino: map['cci_destino'] ?? '',
         monto: (map['monto'] ?? 0).toDouble(),
         concepto: map['concepto'] ?? '',
-        fecha: (map['fecha'] as Timestamp).toDate(),
+        fecha: parseDbDate(map['fecha']),
       );
 
   Map<String, dynamic> toMap() => {
@@ -242,6 +250,120 @@ class Transferencia {
         'cci_destino': cciDestino,
         'monto': monto,
         'concepto': concepto,
-        'fecha': Timestamp.fromDate(fecha),
+        'fecha': toDbDate(fecha),
       };
+}
+
+class TarjetaDebito {
+  final String id;
+  final String usuarioId;
+  final String cuentaId;
+  final String numeroEnmascarado;
+  final String tipo;
+  bool bloqueada;
+
+  TarjetaDebito({
+    required this.id,
+    required this.usuarioId,
+    required this.cuentaId,
+    required this.numeroEnmascarado,
+    required this.tipo,
+    this.bloqueada = false,
+  });
+
+  factory TarjetaDebito.fromMap(Map<String, dynamic> map, String id) => TarjetaDebito(
+        id: id,
+        usuarioId: map['usuario_id'] ?? '',
+        cuentaId: map['cuenta_id'] ?? '',
+        numeroEnmascarado: map['numero_enmascarado'] ?? '****',
+        tipo: map['tipo'] ?? 'Tarjeta De Débito',
+        bloqueada: map['bloqueada'] ?? false,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'usuario_id': usuarioId,
+        'cuenta_id': cuentaId,
+        'numero_enmascarado': numeroEnmascarado,
+        'tipo': tipo,
+        'bloqueada': bloqueada,
+      };
+}
+
+class MovimientoTarjeta {
+  final String id;
+  final String tarjetaId;
+  final String usuarioId;
+  final DateTime fecha;
+  final String comercio;
+  final String descripcion;
+  final double monto;
+
+  MovimientoTarjeta({
+    required this.id,
+    required this.tarjetaId,
+    required this.usuarioId,
+    required this.fecha,
+    required this.comercio,
+    required this.descripcion,
+    required this.monto,
+  });
+}
+
+class Notificacion {
+  final String id;
+  final String usuarioId;
+  final String titulo;
+  final String mensaje;
+  final DateTime fecha;
+  final String tipo;
+  bool leida;
+
+  Notificacion({
+    required this.id,
+    required this.usuarioId,
+    required this.titulo,
+    required this.mensaje,
+    required this.fecha,
+    required this.tipo,
+    this.leida = false,
+  });
+
+  factory Notificacion.fromMap(Map<String, dynamic> map, String id) => Notificacion(
+        id: id,
+        usuarioId: map['usuario_id'] ?? '',
+        titulo: map['titulo'] ?? '',
+        mensaje: map['mensaje'] ?? '',
+        fecha: parseDbDate(map['fecha']),
+        tipo: map['tipo'] ?? 'general',
+        leida: map['leida'] ?? false,
+      );
+
+  Map<String, dynamic> toMap() => {
+        'usuario_id': usuarioId,
+        'titulo': titulo,
+        'mensaje': mensaje,
+        'fecha': toDbDate(fecha),
+        'tipo': tipo,
+        'leida': leida,
+      };
+}
+
+class PagoServicio {
+  final String id;
+  final String usuarioId;
+  final String cuentaId;
+  final String servicio;
+  final String referencia;
+  final double monto;
+  final DateTime fecha;
+
+  PagoServicio({
+    required this.id,
+    required this.usuarioId,
+    required this.cuentaId,
+    required this.servicio,
+    required this.referencia,
+    required this.monto,
+    required this.fecha,
+  });
 }

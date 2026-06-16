@@ -1,17 +1,32 @@
-# app_pichincha
+# Banco Pichincha
 
-A new Flutter project.
+App demo de banca móvil para el proyecto de teoría.
 
-## Getting Started
+## Identidad
 
-This project is a starting point for a Flutter application.
+- **Nombre al instalar:** Banco Pichincha
+- **Carpeta del proyecto:** `banco_pichincha`
+- **Colores:** azul marino `#002B5C`, amarillo `#FFD200`, fondo blanco
 
-A few resources to get you started if this is your first Flutter project:
+## Funcionalidades del usuario
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- **Inicio:** saldo total, acciones rápidas, Yape/Plin/interbancarias, movimientos
+- **Enviar dinero:** Yape, Plin y transferencias interbancarias (CCI)
+- **Contratar:** catálogo de productos (cuentas, préstamos, hipotecas) y servicios (seguros, pagos)
+- **Cuentas:** ahorros, créditos, tarjetas de débito y pagos de servicios
+- **Bandeja:** notificaciones y mensajes del banco
+- **Perfil y Ayuda:** accesibles desde el inicio
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Backend
+
+- **Supabase** (Auth + PostgreSQL)
+- **Modo demo offline** sin conexión (datos en memoria)
+
+## Ejecutar
+
+```bash
+cd banco_pichincha
+flutter pub get
+dart run flutter_launcher_icons
+flutter run
+```

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
+import '../../services/bank_data_service.dart';
+import '../../services/user_scope.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/format_utils.dart';
@@ -23,7 +24,7 @@ class _AhorrosScreenState extends State<AhorrosScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final cuentas = await FirestoreService.getCuentas(FirestoreService.demoUserId);
+    final cuentas = await BankDataService.getCuentas(activeUserId);
     setState(() {
       _cuentas = cuentas;
       _loading = false;
@@ -189,8 +190,8 @@ class _DetalleCuentaSheetState extends State<_DetalleCuentaSheet> {
   }
 
   Future<void> _loadMovimientos() async {
-    final movs = await FirestoreService.getMovimientos(
-      FirestoreService.demoUserId,
+    final movs = await BankDataService.getMovimientos(
+      activeUserId,
       cuentaId: widget.cuenta.id,
       limit: 20,
     );
@@ -366,9 +367,9 @@ class _DepositoSimuladoSheetState extends State<_DepositoSimuladoSheet> {
 
     try {
       final monto = double.parse(_montoController.text);
-      await FirestoreService.realizarDeposito(
+      await BankDataService.realizarDeposito(
         cuentaId: widget.cuenta.id,
-        usuarioId: FirestoreService.demoUserId,
+        usuarioId: activeUserId,
         monto: monto,
         descripcion: _conceptoController.text,
       );

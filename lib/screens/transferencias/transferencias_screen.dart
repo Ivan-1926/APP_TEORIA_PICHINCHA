@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
+import '../../services/bank_data_service.dart';
+import '../../services/user_scope.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/format_utils.dart';
@@ -30,11 +31,11 @@ class _TransferenciasScreenState extends State<TransferenciasScreen> with Single
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transferencias / Pagos'),
+        title: const Text('Transferencias interbancarias'),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
           indicatorColor: AppColors.accent,
           indicatorWeight: 3,
           tabs: const [
@@ -97,7 +98,7 @@ class _NuevaTransferenciaTabState extends State<_NuevaTransferenciaTab> {
   }
 
   Future<void> _loadCuentas() async {
-    final cuentas = await FirestoreService.getCuentas(FirestoreService.demoUserId);
+    final cuentas = await BankDataService.getCuentas(activeUserId);
     setState(() {
       _cuentasOrigen = cuentas;
       if (cuentas.isNotEmpty) _cuentaSeleccionada = cuentas.first;
@@ -127,9 +128,9 @@ class _NuevaTransferenciaTabState extends State<_NuevaTransferenciaTab> {
     });
 
     try {
-      final destCuenta = await FirestoreService.getCuentaPorCCI(cci);
+      final destCuenta = await BankDataService.getCuentaPorCCI(cci);
       if (destCuenta != null) {
-        final destUser = await FirestoreService.getUsuario(destCuenta.usuarioId);
+        final destUser = await BankDataService.getUsuario(destCuenta.usuarioId);
         setState(() {
           _cuentaDestino = destCuenta;
           _usuarioDestino = destUser;
@@ -156,9 +157,9 @@ class _NuevaTransferenciaTabState extends State<_NuevaTransferenciaTab> {
 
     setState(() => _transferring = true);
 
-    final error = await FirestoreService.realizarTransferencia(
+    final error = await BankDataService.realizarTransferencia(
       cuentaOrigenId: _cuentaSeleccionada!.id,
-      usuarioOrigenId: FirestoreService.demoUserId,
+      usuarioOrigenId: activeUserId,
       cciDestino: _cciController.text.trim(),
       monto: double.parse(_montoController.text),
       concepto: _conceptoController.text.trim(),
@@ -402,7 +403,7 @@ class _HistorialTransferenciasTabState extends State<_HistorialTransferenciasTab
   }
 
   Future<void> _load() async {
-    final list = await FirestoreService.getTransferencias(FirestoreService.demoUserId);
+    final list = await BankDataService.getTransferencias(activeUserId);
     setState(() {
       _transferencias = list;
       _loading = false;

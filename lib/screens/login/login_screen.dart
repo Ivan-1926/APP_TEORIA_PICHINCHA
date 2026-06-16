@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/brand_logo.dart';
 import 'registro_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -55,16 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _enterDemo() {
-    AuthService.enterDemoMode();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Accediendo en Modo Demo Offline'),
-        backgroundColor: AppColors.primaryLight,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -105,37 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 40),
-                        // Logo Banco Pichincha
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              )
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.account_balance,
-                            size: 48,
-                            color: AppColors.primary,
-                          ),
+                        const BrandLogo(
+                          size: 88,
+                          titleOnDarkBackground: true,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'BANCO PICHINCHA',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 12),
                         const Text(
                           'En confianza',
                           style: TextStyle(
@@ -158,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 decoration: const BoxDecoration(
-                  color: AppColors.background,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(32),
                     topRight: Radius.circular(32),
@@ -294,37 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 32),
-
-                      const Divider(),
                       const SizedBox(height: 24),
-
-                      // Botón Modo Demo Resiliente
-                      OutlinedButton.icon(
-                        onPressed: _enterDemo,
-                        icon: const Icon(Icons.flash_on, color: AppColors.accentDark),
-                        label: const Text(
-                          'Ingreso Rápido (Modo Demo Offline)',
-                          style: TextStyle(color: AppColors.accentDark, fontWeight: FontWeight.bold),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          side: const BorderSide(color: AppColors.accent, width: 1.5),
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Center(
-                        child: Text(
-                          'Acceso directo sin Internet ni base de datos Firebase.',
-                          style: TextStyle(
-                            color: AppColors.textHint,
-                            fontSize: 11,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
+import '../../services/bank_data_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
@@ -33,8 +33,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final currentId = AuthService.currentUser?.id ?? FirestoreService.demoUserId;
-    final user = await FirestoreService.getUsuario(currentId);
+    final currentId = AuthService.currentUser?.id ?? BankDataService.demoUserId;
+    final user = await BankDataService.getUsuario(currentId);
     setState(() {
       _usuario = user;
       if (user != null) _celularController.text = user.celular;
@@ -47,8 +47,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
     setState(() => _saving = true);
 
     try {
-      final currentId = AuthService.currentUser?.id ?? FirestoreService.demoUserId;
-      await FirestoreService.actualizarCelular(
+      final currentId = AuthService.currentUser?.id ?? BankDataService.demoUserId;
+      await BankDataService.actualizarCelular(
         currentId,
         _celularController.text.trim(),
       );

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
+import '../../services/bank_data_service.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/brand_logo.dart';
+import '../../services/user_scope.dart';
 import '../home_shell.dart';
+import '../perfil/perfil_screen.dart';
+import '../ayuda/ayuda_screen.dart';
 import '../../utils/format_utils.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -24,8 +28,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _load() async {
-    final cuentas = await FirestoreService.getCuentas(FirestoreService.demoUserId);
-    final movs = await FirestoreService.getMovimientos(FirestoreService.demoUserId, limit: 5);
+    final cuentas = await BankDataService.getCuentas(activeUserId);
+    final movs = await BankDataService.getMovimientos(activeUserId, limit: 5);
     setState(() {
       _cuentas = cuentas;
       _movimientos = movs;
@@ -49,6 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             else ...[
               SliverToBoxAdapter(child: _buildSaldoCard()),
               SliverToBoxAdapter(child: _buildAccionesRapidas(context)),
+              SliverToBoxAdapter(child: _buildDescubreSection(context)),
               SliverToBoxAdapter(child: _buildUltimosMovimientos()),
             ],
           ],
@@ -62,19 +67,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
       expandedHeight: 0,
       floating: true,
       snap: true,
-      backgroundColor: AppColors.primary,
-      title: Row(children: [
-        Image.network(
-          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Banco_Pichincha_logo.svg/200px-Banco_Pichincha_logo.svg.png',
-          height: 28,
-          errorBuilder: (_, __, ___) => const Text('Banco Pichincha',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-        ),
-      ]),
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: AppColors.surface,
+      title: const Row(
+        children: [
+          BrandMark(size: 30),
+          SizedBox(width: 10),
+          Text(
+            'BANCO PICHINCHA',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-          onPressed: () {},
+          icon: const Icon(Icons.help_outline, color: AppColors.primary),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AyudaScreen()),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.person_outline, color: AppColors.primary),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PerfilScreen()),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: AppColors.primary),
+          onPressed: () => HomeShellProvider.of(context)?.switchTab(4),
         ),
       ],
     );
@@ -84,13 +111,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.18),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -133,10 +162,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildAccionesRapidas(BuildContext context) {
     final items = [
-      _QuickAction(icon: Icons.savings, label: 'Ahorros', color: const Color(0xFF1E40AF), index: 1),
-      _QuickAction(icon: Icons.credit_card, label: 'Créditos', color: const Color(0xFF7C3AED), index: 2),
-      _QuickAction(icon: Icons.swap_horiz, label: 'Transferir', color: AppColors.accent, index: 3),
-      _QuickAction(icon: Icons.person, label: 'Perfil', color: const Color(0xFFB45309), index: 4),
+      _QuickAction(icon: Icons.payments_outlined, label: 'Enviar', index: 1),
+      _QuickAction(icon: Icons.add_circle_outline, label: 'Contratar', index: 2),
+      _QuickAction(icon: Icons.account_balance_wallet_outlined, label: 'Cuentas', index: 3),
+      _QuickAction(icon: Icons.mail_outline, label: 'Bandeja', index: 4),
     ];
 
     return Padding(
@@ -170,15 +199,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: a.color.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: a.color.withOpacity(0.2)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
             ),
-            child: Icon(a.icon, color: a.color, size: 28),
+            child: Icon(a.icon, color: AppColors.primary, size: 28),
           ),
           const SizedBox(height: 6),
           Text(a.label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ]),
+      ),
+    );
+  }
+
+  Widget _buildDescubreSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Descubre todo lo que puedes hacer',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Consultas 24/7, pagos de servicios, Yape, Plin e interbancarias.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          _FeatureBanner(
+            title: 'Yape',
+            subtitle: 'Envía y recibe dinero desde la app',
+            color: const Color(0xFF742284),
+            onTap: () => HomeShellProvider.of(context)?.switchTab(1),
+          ),
+          const SizedBox(height: 8),
+          _FeatureBanner(
+            title: 'Plin',
+            subtitle: 'Transferencias instantáneas a celular',
+            color: const Color(0xFF00A19A),
+            onTap: () => HomeShellProvider.of(context)?.switchTab(1),
+          ),
+          const SizedBox(height: 8),
+          _FeatureBanner(
+            title: 'Interbancarias gratis',
+            subtitle: 'Hasta S/ 500 o US\$ 140 desde la app',
+            color: AppColors.primary,
+            onTap: () => HomeShellProvider.of(context)?.switchTab(1),
+          ),
+        ],
       ),
     );
   }
@@ -214,16 +284,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-abstract class _HomeShellStateAccess {
-  void switchTab(int index);
-}
-
 class _QuickAction {
   final IconData icon;
   final String label;
-  final Color color;
   final int index;
-  const _QuickAction({required this.icon, required this.label, required this.color, required this.index});
+  const _QuickAction({required this.icon, required this.label, required this.index});
+}
+
+class _FeatureBanner extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _FeatureBanner({
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.accent.withValues(alpha: 0.2),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.phone_android, color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _MovimientoTile extends StatelessWidget {

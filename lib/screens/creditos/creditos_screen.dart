@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
+import '../../services/bank_data_service.dart';
+import '../../services/user_scope.dart';
 import '../../models/models.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/format_utils.dart';
@@ -23,7 +24,7 @@ class _CreditosScreenState extends State<CreditosScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final creditos = await FirestoreService.getCreditos(FirestoreService.demoUserId);
+    final creditos = await BankDataService.getCreditos(activeUserId);
     setState(() {
       _creditos = creditos;
       _loading = false;
@@ -176,13 +177,23 @@ class _CreditosScreenState extends State<CreditosScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(value,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: highlight ? AppColors.error : AppColors.textPrimary)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: highlight ? AppColors.error : AppColors.textSecondary,
+          ),
+        ),
       ],
     );
   }
@@ -210,7 +221,7 @@ class _CronogramaSheetState extends State<_CronogramaSheet> {
   }
 
   Future<void> _load() async {
-    final cuotas = await FirestoreService.getCuotas(widget.credito.id);
+    final cuotas = await BankDataService.getCuotas(widget.credito.id);
     setState(() {
       _cuotas = cuotas;
       _loading = false;
