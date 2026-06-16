@@ -12,11 +12,13 @@ class SecureSessionService {
 
   static Future<void> saveSession({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
     required String documento,
   }) async {
     await _storage.write(key: _keyAccessToken, value: accessToken);
-    await _storage.write(key: _keyRefreshToken, value: refreshToken);
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _storage.write(key: _keyRefreshToken, value: refreshToken);
+    }
     await _storage.write(key: _keyDocumento, value: documento);
   }
 
