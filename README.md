@@ -34,7 +34,7 @@ Proyecto: `https://uomaqpphyouzbnestbba.supabase.co`
 
 Registro Caso 1: nombre **Anaximandro Quispe**, DNI **40118120**, correo válido.
 
-Más detalle: `fuerza-ventas-web/CREDENCIALES_DEMO.md` en el monorepo local o repo web en GitHub.
+Más detalle (3 apps): [`CREDENCIALES_DEMO.md`](https://github.com/Ivan-1926/web_fuerza_de_venta/blob/main/CREDENCIALES_DEMO.md) en el repo web.
 
 ## Ejecutar
 
