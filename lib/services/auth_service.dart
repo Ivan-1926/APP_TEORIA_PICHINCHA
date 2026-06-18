@@ -132,75 +132,40 @@ class AuthService {
     required String celular,
   }) async {
     try {
+      // Los metadatos (nombre, documento, celular) los usa el trigger
+      // handle_new_user() en Supabase para crear usuario, perfil, cuentas y
+      // tarjeta del lado servidor (SECURITY DEFINER, sin depender de la sesión).
       final response = await SupabaseService.client.auth.signUp(
         email: email.trim(),
         password: password,
+        data: {
+          'nombre': nombre.trim(),
+          'documento': documento.trim(),
+          'celular': celular.trim(),
+        },
       );
       final user = response.user;
       if (user == null) return 'No se pudo crear la cuenta.';
 
-      final uid = user.id;
-      await SupabaseService.client.from('usuarios').upsert({
-        'id': uid,
-        'nombre': nombre.trim(),
-        'documento': documento.trim(),
-        'email': email.trim().toLowerCase(),
-        'celular': celular.trim(),
-      });
-
-      await SupabaseService.client.from('profiles').upsert({
-        'id': uid,
-        'rol': 'cliente',
-        'documento': documento.trim(),
-        'login_attempts': 0,
-      });
-
-      final numAhorros = '2100${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-      final numCorriente = '2100${(DateTime.now().millisecondsSinceEpoch + 1).toString().substring(7)}';
-
-      await SupabaseService.client.from('cuentas_ahorro').insert([
-        {
-          'id': 'ca_${uid}_ahorros',
-          'usuario_id': uid,
-          'numero': numAhorros,
-          'cci': '0022100$numAhorros\0000',
-          'tipo': 'Cuenta de Ahorros',
-          'saldo': 5000.00,
-        },
-        {
-          'id': 'ca_${uid}_corriente',
-          'usuario_id': uid,
-          'numero': numCorriente,
-          'cci': '0022100$numCorriente\0000',
-          'tipo': 'Cuenta Corriente',
-          'saldo': 1000.00,
-        },
-      ]);
-
-      await SupabaseService.client.from('tarjetas').insert({
-        'id': 'td_${uid}_1',
-        'usuario_id': uid,
-        'cuenta_id': 'ca_${uid}_ahorros',
-        'numero_enmascarado': '*${numAhorros.substring(numAhorros.length - 4)}',
-        'tipo': 'Tarjeta De Débito',
-        'bloqueada': false,
-      });
-
-      if (response.session != null) {
-        await SecureSessionService.saveSession(
-          accessToken: response.session!.accessToken,
-          refreshToken: response.session!.refreshToken,
-          documento: documento.trim(),
-        );
+      // Sin sesión = confirmación de email activada en Supabase.
+      if (response.session == null) {
+        return 'Cuenta creada. Revisa tu correo para confirmarla. '
+            '(O desactiva "Confirm email" en Supabase para entrar al instante).';
       }
 
-      await _loadProfile(uid, email);
+      await SecureSessionService.saveSession(
+        accessToken: response.session!.accessToken,
+        refreshToken: response.session!.refreshToken,
+        documento: documento.trim(),
+      );
+
+      await _loadProfile(user.id, email);
       return null;
     } on AuthException catch (e) {
       return _translateAuthError(e.message);
     } catch (e) {
       debugPrint('Error en registro: $e');
-      return 'Error al registrar. Ejecuta los scripts SQL en Supabase.';
+      return 'Error al registrar: $e';
     }
   }
 
