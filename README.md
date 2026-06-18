@@ -16,13 +16,25 @@ App móvil de homebanking para el proyecto final (rúbrica Banco Andino).
 
 ## Supabase
 
-1. Ejecutar `supabase/schema_and_seed.sql`
-2. Ejecutar `supabase/02_rubrica_integracion.sql`
-3. Ejecutar `supabase/03_fix_registro.sql`
-4. Ejecutar `supabase/04_cliente_solicitud_credito.sql` (solicitudes desde app cliente → FV)
-3. Desactivar confirmación de email en Auth (desarrollo)
+1. `supabase/schema_and_seed.sql`
+2. `supabase/02_rubrica_integracion.sql`
+3. `supabase/03_fix_registro.sql`
+4. `supabase/04_cliente_solicitud_credito.sql` (solicitudes desde app cliente → FV)
+5. Desactivar confirmación de email en Auth (desarrollo)
 
 Proyecto: `https://uomaqpphyouzbnestbba.supabase.co`
+
+## Credenciales demo (Caso 1)
+
+| App | Login | Contraseña |
+|-----|-------|------------|
+| **Cliente** (esta app) | DNI `40118120` | La que elijas al **registrarte** (sugerido: `Docente2025!`) |
+| **Asesor móvil** | `demo@pichincha.com` | `pichincha123` |
+| **Supervisor web** | Sin login (sesión fija supervisor) | — |
+
+Registro Caso 1: nombre **Anaximandro Quispe**, DNI **40118120**, correo válido.
+
+Más detalle: `fuerza-ventas-web/CREDENCIALES_DEMO.md` en el monorepo local o repo web en GitHub.
 
 ## Ejecutar
 
