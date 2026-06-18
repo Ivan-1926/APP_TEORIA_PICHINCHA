@@ -18,6 +18,8 @@ App móvil de homebanking para el proyecto final (rúbrica Banco Andino).
 
 1. Ejecutar `supabase/schema_and_seed.sql`
 2. Ejecutar `supabase/02_rubrica_integracion.sql`
+3. Ejecutar `supabase/03_fix_registro.sql`
+4. Ejecutar `supabase/04_cliente_solicitud_credito.sql` (solicitudes desde app cliente → FV)
 3. Desactivar confirmación de email en Auth (desarrollo)
 
 Proyecto: `https://uomaqpphyouzbnestbba.supabase.co`
