@@ -23,8 +23,12 @@ set search_path = public
 as $$
 declare
   v_uid       text := new.id::text;
+  v_staff_rol text := lower(coalesce(nullif(trim(new.raw_user_meta_data->>'rol'), ''), ''));
   v_nombre    text := coalesce(nullif(trim(new.raw_user_meta_data->>'nombre'), ''), 'Usuario Nuevo');
-  v_documento text := coalesce(nullif(trim(new.raw_user_meta_data->>'documento'), ''), '00000000');
+  v_documento text := coalesce(
+    nullif(trim(new.raw_user_meta_data->>'documento'), ''),
+    '9' || substr(replace(v_uid, '-', ''), 1, 7)
+  );
   v_celular   text := coalesce(new.raw_user_meta_data->>'celular', '');
   v_seed      bigint := abs(hashtext(v_uid));
   v_num_ah    text := '2100' || lpad((v_seed % 1000000)::text, 6, '0');
@@ -32,6 +36,9 @@ declare
   v_cci_ah    text := '002A' || replace(v_uid, '-', '');
   v_cci_cte   text := '002B' || replace(v_uid, '-', '');
 begin
+  if v_staff_rol in ('asesor', 'supervisor', 'admin') then
+    return new;
+  end if;
   -- 1. Usuario
   insert into public.usuarios (id, nombre, documento, email, celular)
   values (v_uid, v_nombre, v_documento, new.email, v_celular)

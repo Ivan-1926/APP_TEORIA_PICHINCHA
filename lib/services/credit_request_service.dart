@@ -24,15 +24,32 @@ class SolicitudCreditoResult {
 
 /// Registra solicitudes de crédito originadas por el cliente (canal app).
 class CreditRequestService {
-  static const _teaDefault = 18.0;
+  /// TEA tarifario académico (30 casos microempresa).
+  static const teaConSeguro = 40.92;
+  static const teaSinSeguro = 43.92;
+  static const _teaLegacy = 18.0;
+
+  static double teaParaProducto(String producto, {bool conSeguroDesgravamen = false}) {
+    final p = producto.toLowerCase();
+    if (p.contains('empresarial') || p.contains('microempresa')) {
+      return conSeguroDesgravamen ? teaConSeguro : teaSinSeguro;
+    }
+    return _teaLegacy;
+  }
 
   static double calcularCuotaMensual({
     required double monto,
     required int plazoMeses,
-    double teaPercent = _teaDefault,
+    double? teaPercent,
+    String? producto,
+    bool conSeguroDesgravamen = false,
   }) {
+    final tea = teaPercent ??
+        (producto != null
+            ? teaParaProducto(producto, conSeguroDesgravamen: conSeguroDesgravamen)
+            : _teaLegacy);
     if (monto <= 0 || plazoMeses <= 0) return 0;
-    final tem = math.pow(1 + teaPercent / 100, 1 / 12).toDouble() - 1;
+    final tem = math.pow(1 + tea / 100, 1 / 12).toDouble() - 1;
     if (tem <= 0) return monto / plazoMeses;
     final factor = math.pow(1 + tem, plazoMeses).toDouble();
     return monto * (tem * factor) / (factor - 1);
@@ -47,7 +64,10 @@ class CreditRequestService {
     required int plazoMeses,
     required String destino,
     String? garantia,
+    bool conSeguroDesgravamen = false,
+    double? teaPercent,
   }) async {
+    final tea = teaPercent ?? teaParaProducto(producto, conSeguroDesgravamen: conSeguroDesgravamen);
     final res = await SupabaseService.client.rpc(
       'rpc_registrar_solicitud_cliente',
       params: {
@@ -58,6 +78,7 @@ class CreditRequestService {
         'p_plazo_meses': plazoMeses,
         'p_destino': destino.trim(),
         'p_garantia': garantia?.trim(),
+        'p_tea': tea,
       },
     );
 
@@ -81,8 +102,15 @@ class CreditRequestService {
     required int plazoMeses,
     required String destino,
     String? garantia,
+    bool conSeguroDesgravamen = false,
+    double? teaPercent,
   }) async {
-    final cuota = calcularCuotaMensual(monto: monto, plazoMeses: plazoMeses);
+    final tea = teaPercent ?? teaParaProducto(producto, conSeguroDesgravamen: conSeguroDesgravamen);
+    final cuota = calcularCuotaMensual(
+      monto: monto,
+      plazoMeses: plazoMeses,
+      teaPercent: tea,
+    );
     final purpose = StringBuffer('[Canal: cliente] $producto — $destino');
     if (garantia != null && garantia.isNotEmpty) {
       purpose.write(' | Garantía: $garantia');
@@ -95,7 +123,7 @@ class CreditRequestService {
           'client_dni': documento,
           'amount': monto,
           'term_months': plazoMeses,
-          'tea': _teaDefault,
+          'tea': tea,
           'monthly_payment': double.parse(cuota.toStringAsFixed(2)),
           'purpose': purpose.toString(),
           'status': 'enviado',
@@ -121,6 +149,8 @@ class CreditRequestService {
     required int plazoMeses,
     required String destino,
     String? garantia,
+    bool conSeguroDesgravamen = false,
+    double? teaPercent,
   }) async {
     try {
       return await registrarSolicitud(
@@ -131,6 +161,8 @@ class CreditRequestService {
         plazoMeses: plazoMeses,
         destino: destino,
         garantia: garantia,
+        conSeguroDesgravamen: conSeguroDesgravamen,
+        teaPercent: teaPercent,
       );
     } on PostgrestException catch (e) {
       if (e.code == 'PGRST202' || e.message.contains('rpc_registrar_solicitud_cliente')) {
@@ -142,6 +174,8 @@ class CreditRequestService {
           plazoMeses: plazoMeses,
           destino: destino,
           garantia: garantia,
+          conSeguroDesgravamen: conSeguroDesgravamen,
+          teaPercent: teaPercent,
         );
       }
       rethrow;

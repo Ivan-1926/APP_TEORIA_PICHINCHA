@@ -41,6 +41,16 @@ const productosCatalog = [
     ],
   ),
   CatalogSection(
+    title: 'Crédito Empresarial',
+    items: [
+      CatalogItem(
+        title: 'Crédito Empresarial — Microempresa',
+        subtitle: 'TEA 43.92% sin seguro · 40.92% con desgravamen',
+        icon: Icons.storefront_outlined,
+      ),
+    ],
+  ),
+  CatalogSection(
     title: 'Préstamos y tarjetas',
     items: [
       CatalogItem(
