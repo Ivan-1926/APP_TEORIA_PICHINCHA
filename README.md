@@ -28,7 +28,7 @@ Proyecto: `https://uomaqpphyouzbnestbba.supabase.co`
 
 | App | Login | Contraseña |
 |-----|-------|------------|
-| **Cliente** (esta app) | DNI `40118120` | La que elijas al **registrarte** (sugerido: `Docente2025!`) |
+| **Cliente** (esta app) | DNI `40118120` | La que elijas al **registrarte** (sugerido: `cyA675ytji`) |
 | **Asesor móvil** | `demo@pichincha.com` | `pichincha123` |
 | **Supervisor web** | Sin login (sesión fija supervisor) | — |
 
